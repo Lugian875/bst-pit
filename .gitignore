@@ -1,6 +1,7 @@
 # CLion stuff to ignore
-CMakeLists.txt
-./cmake-build-debug
+/CMakeLists.txt
+/cmake-build-debug/
+.idea/
 
 # C++ Template
 
