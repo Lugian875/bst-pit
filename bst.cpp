@@ -1,9 +1,8 @@
 /* bst.cpp
  * Maxwell Benefield
  * COP3415
- * Last Modified: March 18, 2025
+ * Last Modified: March 20, 2025
  */
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -11,7 +10,11 @@
 
 using namespace std;
 
+class itemNode;
+class treeNameNode;
+
 string nextLine();
+void tint_names (const treeNameNode* node);
 
 // Item Node Implementation
 // Stores data for each item of each tree
@@ -65,9 +68,11 @@ public:
 
 
 /* insertToName
- *
- *
- *
+ * Description: This function inserts nodes into the Name tree recursively.
+ * Parameters:
+ * - treeNameNode *root: The address of the current root of the Name tree.
+ * - treeNameNode *element: The element to be inserted into the Name tree.
+ * Return: The updated root of the Name tree
  */
 treeNameNode* insertToName(treeNameNode *root, treeNameNode *element) {
     // When tree is empty, just insert the element and make it the root
@@ -97,11 +102,12 @@ treeNameNode* insertToName(treeNameNode *root, treeNameNode *element) {
 }
 
 /* buildNameTree
-     * Description:
+     * Description: This builds a name tree using queries from an input file
      * Parameters:
-     * Return: the root of the treeNameNode
+     * - int treeNameCount (the number of lines from input that has queries for inserting nodes into Name tree)
+     * Return: the root of the given treeNameNode
      */
-treeNameNode* buildNameTree(int treeNameCount) {
+treeNameNode* buildNameTree(const int treeNameCount) {
     treeNameNode* tempNode, *root = nullptr;
     for (int i = 1; i <= treeNameCount; i++) {
         string element = nextLine();
@@ -111,10 +117,29 @@ treeNameNode* buildNameTree(int treeNameCount) {
     return root;
 }
 
+/* traverse_in_traverse
+ * Description: Traverses the Name tree, printing all the trees' names and the items within them in
+ * a designated format.
+ * Parameter: treeNameNode* root (the address of the root of the name_tree)
+ * Return: nothing
+ */
+void traverse_in_traverse (const treeNameNode *root) {
+    tint_names(root);
+    cout << endl;
+}
+void tint_names (const treeNameNode* node) {
+    if (!node)
+        return;
+    tint_names(node->left);
+    cout << node->treeName << " ";
+    tint_names(node->right);
+}
+
+
 
 /* nextLine
  * Description: Each time the function is called, the next line of "in.txt" is read.
- * Parameters:  none
+ * Parameters: none
  * Return: The string from the given line in the .txt file.
  */
 string nextLine() {
@@ -166,6 +191,7 @@ int main() {
 
     cout << queryCount << endl;
     name_tree = buildNameTree(treeNameCount);
+    traverse_in_traverse(name_tree);
 
     delete name_tree;
     return 0;
