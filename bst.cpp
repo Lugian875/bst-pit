@@ -5,8 +5,13 @@
  */
 
 #include <iostream>
-// #include <string.h>
+#include <fstream>
+#include <sstream>
+#include <string>
+
 using namespace std;
+
+string nextLine();
 
 // Item Node Implementation
 // Stores data for each item of each tree
@@ -58,18 +63,6 @@ public:
     }
 };
 
-/* buildNameTree
- * Description:
- * Parameters:
- * Return: the root of the treeNameNode
- */
-void buildNameTree( FILE* infile, treeNameNode* name, int treeNameCount) {
-    string element;
-    fscanf(infile, "%s", &element);
-    // for (int i = 1; i <= treeNameCount; i++) {
-    //
-    // }
-}
 
 /* insertToName
  *
@@ -77,24 +70,103 @@ void buildNameTree( FILE* infile, treeNameNode* name, int treeNameCount) {
  *
  */
 treeNameNode* insertToName(treeNameNode *root, treeNameNode *element) {
+    // When tree is empty, just insert the element and make it the root
     if (root == nullptr) {
         return element;
+    } else {
+        // condition for when the element should be inserted to the right
+        if (element->treeName > root->treeName) {
+            // If there is a right subtree, insert it there
+            if (root->right != nullptr)
+                root->right = insertToName(root->right, element);
+            // Else, just insert it to the right of the root
+            else
+                root->right = element;
+        }
+        // condition for when the element should be inserted to the left
+        else {
+            // If there is a left subtree, insert it there
+            if (root->left != nullptr)
+                root->left = insertToName(root->left, element);
+            // Else, just insert it to the left of the root
+            else
+                root->left = element;
+        }
+        return root; // Returns root pointer of the updated tree
     }
 }
 
+/* buildNameTree
+     * Description:
+     * Parameters:
+     * Return: the root of the treeNameNode
+     */
+treeNameNode* buildNameTree(int treeNameCount) {
+    treeNameNode* tempNode, *root = nullptr;
+    for (int i = 1; i <= treeNameCount; i++) {
+        string element = nextLine();
+        tempNode = new treeNameNode(element);
+        root = insertToName(root, tempNode);
+    }
+    return root;
+}
+
+
+/* nextLine
+ * Description: Each time the function is called, the next line of "in.txt" is read.
+ * Parameters:  none
+ * Return: The string from the given line in the .txt file.
+ */
+string nextLine() {
+    static ifstream file;
+    static bool fileOpened = false;
+
+    // The first call opens the file
+    if(!fileOpened) {
+        file.open("in.txt");
+        if (!file.is_open()) {
+            throw ("Error: File not found");
+        }
+        fileOpened = true;
+    }
+
+    string line;
+    if (getline(file, line)) {
+        return line;
+    } else {
+        file.close();
+        fileOpened = false;
+        return "EOF"; // end of file
+    }
+}
 
 int main() {
     int treeNameCount = 0, itemCount = 0, queryCount = 0;
-    treeNameNode* name_tree= new treeNameNode();
+    treeNameNode* name_tree= nullptr;
 
-    FILE *infile = fopen("in.txt", "r");
-    if (infile == NULL) {
-        perror("Error");
+    // First line int extraction
+    stringstream firstLine;
+    firstLine << nextLine();
+    string temp; int is_Int;
+    while (!firstLine.eof()) {
+        firstLine >> temp;
+        if (stringstream(temp) >> is_Int) {
+            if (treeNameCount == 0)
+                treeNameCount = is_Int;
+            else if (itemCount == 0)
+                itemCount = is_Int;
+            else if (queryCount == 0)
+                queryCount = is_Int;
+            else
+                throw ("First line of in.txt is not correctly formatted\n "
+                       "It should be three integers in sequence like \"N I Q\"");
+
+        }
     }
-    // First line scanning
-    fscanf(infile, "%d %d %d", &treeNameCount, &itemCount, &queryCount);
-    buildNameTree(infile, name_tree, treeNameCount);
 
-    fclose(infile);
+    cout << queryCount << endl;
+    name_tree = buildNameTree(treeNameCount);
+
+    delete name_tree;
     return 0;
 }
