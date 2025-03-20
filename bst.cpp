@@ -5,7 +5,6 @@
  */
 
 #include <iostream>
-#include <utility>
 // #include <string.h>
 using namespace std;
 
@@ -59,15 +58,43 @@ public:
     }
 };
 
+/* buildNameTree
+ * Description:
+ * Parameters:
+ * Return: the root of the treeNameNode
+ */
+void buildNameTree( FILE* infile, treeNameNode* name, int treeNameCount) {
+    string element;
+    fscanf(infile, "%s", &element);
+    // for (int i = 1; i <= treeNameCount; i++) {
+    //
+    // }
+}
 
-
-
-
-
-
+/* insertToName
+ *
+ *
+ *
+ */
+treeNameNode* insertToName(treeNameNode *root, treeNameNode *element) {
+    if (root == nullptr) {
+        return element;
+    }
+}
 
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    int treeNameCount = 0, itemCount = 0, queryCount = 0;
+    treeNameNode* name_tree= new treeNameNode();
+
+    FILE *infile = fopen("in.txt", "r");
+    if (infile == NULL) {
+        perror("Error");
+    }
+    // First line scanning
+    fscanf(infile, "%d %d %d", &treeNameCount, &itemCount, &queryCount);
+    buildNameTree(infile, name_tree, treeNameCount);
+
+    fclose(infile);
     return 0;
 }
