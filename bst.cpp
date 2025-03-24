@@ -118,13 +118,14 @@ treeNameNode* buildNameTree(const int treeNameCount) {
 }
 
 /* traverse_in_traverse
- * Description: Traverses the Name tree, printing all the trees' names and the items within them in
- * a designated format.
+ * Description: Traverses the main Name tree using inorder traversal, prints each name,
+ * then does the same for each name tree (looks at the items)
  * Parameter: treeNameNode* root (the address of the root of the name_tree)
  * Return: nothing
  */
 void traverse_in_traverse (const treeNameNode *root) {
     tint_names(root);
+    //tint_itmes(root);
     cout << endl;
 }
 void tint_names (const treeNameNode* node) {
