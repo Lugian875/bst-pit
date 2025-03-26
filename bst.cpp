@@ -10,12 +10,6 @@
 
 using namespace std;
 
-class itemNode;
-class treeNameNode;
-
-string nextLine();
-itemNode* insertItem(itemNode* root, itemNode* element);
-
 /* Classes */
 
 /* Item Node Implementation
@@ -68,6 +62,34 @@ public:
         right = nullptr;
     }
 };
+
+/* nextLine
+ * Description: Each time the function is called, the next line of "in.txt" is read.
+ * Parameters: none
+ * Return: The string from the given line in the .txt file.
+ */
+string nextLine() {
+    static ifstream file;
+    static bool fileOpened = false;
+
+    // The first call opens the file
+    if(!fileOpened) {
+        file.open("in.txt");
+        if (!file.is_open()) {
+            throw ("Error: File not found");
+        }
+        fileOpened = true;
+    }
+
+    string line;
+    if (getline(file, line)) {
+        return line;
+    } else {
+        file.close();
+        fileOpened = false;
+        return "EOF"; // end of file
+    }
+}
 
 /* Name Tree Functions */
 
@@ -142,6 +164,38 @@ treeNameNode* searchNameNode(treeNameNode* root, const string &treeName) {
 }
 
 /* Item Tree Functions */
+/* insertItem
+ * Description: Inserts each individual Item into their respective location in their Item tree.
+ * Parameters:
+ * - itemNode* root: The root of the item tree
+ * - itemNode* element: The element to be added, containing the name and count of Item
+ * Return: Updated root of the Item tree
+ */
+itemNode *insertItem(itemNode* root, itemNode* element) {
+    if (root == nullptr) {
+        return element;
+    } else {
+        // Condition for when the element should be inserted to the right
+        if (element->name > root->name) {
+            // If there is a right subtree, insert it there
+            if (root-> right != nullptr)
+                root->right = insertItem(root->right,element);
+            // Else, just insert it to the right of the root
+            else
+                root->right = element;
+        }
+        // Condition for when the element should be inserted to the left
+        else {
+            // If there is a left subtree, insert it there
+            if (root->left != nullptr)
+                root->left = insertItem(root->left, element);
+            // Else, just insert it to the left of the root
+            else
+                root->left = element;
+        }
+        return root; // returns root pointer of the updated tree
+    }
+}
 
 /* insertToItems
  * Description: Inserts nodes into Item trees found in the Name tree
@@ -182,39 +236,6 @@ void insertToItems(treeNameNode *root, const int numItems) {
     }
 }
 
-/* insertItem
- * Description: Inserts each individual Item into their respective location in their Item tree.
- * Parameters:
- * - itemNode* root: The root of the item tree
- * - itemNode* element: The element to be added, containing the name and count of Item
- * Return: Updated root of the Item tree
- */
-itemNode *insertItem(itemNode* root, itemNode* element) {
-    if (root == nullptr) {
-        return element;
-    } else {
-        // Condition for when the element should be inserted to the right
-        if (element->name > root->name) {
-            // If there is a right subtree, insert it there
-            if (root-> right != nullptr)
-                root->right = insertItem(root->right,element);
-            // Else, just insert it to the right of the root
-            else
-                root->right = element;
-        }
-        // Condition for when the element should be inserted to the left
-        else {
-            // If there is a left subtree, insert it there
-            if (root->left != nullptr)
-                root->left = insertItem(root->left, element);
-            // Else, just insert it to the left of the root
-            else
-                root->left = element;
-        }
-        return root; // returns root pointer of the updated tree
-    }
-
-}
 
 void tint_names (const treeNameNode* node, bool printItems);
 void tint_items (const itemNode* node);
@@ -254,34 +275,6 @@ void tint_items(const itemNode* node) {
     tint_items(node->right);
 }
 
-
-/* nextLine
- * Description: Each time the function is called, the next line of "in.txt" is read.
- * Parameters: none
- * Return: The string from the given line in the .txt file.
- */
-string nextLine() {
-    static ifstream file;
-    static bool fileOpened = false;
-
-    // The first call opens the file
-    if(!fileOpened) {
-        file.open("in.txt");
-        if (!file.is_open()) {
-            throw ("Error: File not found");
-        }
-        fileOpened = true;
-    }
-
-    string line;
-    if (getline(file, line)) {
-        return line;
-    } else {
-        file.close();
-        fileOpened = false;
-        return "EOF"; // end of file
-    }
-}
 
 int main() {
     int numTreeNames = 0, numItems = 0, numQuery = 0;
