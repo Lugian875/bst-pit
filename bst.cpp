@@ -134,11 +134,10 @@ treeNameNode *insertToName(treeNameNode *root, treeNameNode *element) {
  * Return: the root of the treeNameNode after all nodes have been added
  */
 treeNameNode *buildNameTree(const int numTreeNames) {
-    treeNameNode *tempNode, *root = nullptr;
+    treeNameNode *root = nullptr;
     for (int i = 1; i <= numTreeNames; i++) {
         string element = nextLine();
-        tempNode = new treeNameNode(element);
-        root = insertToName(root, tempNode);
+        root = insertToName(root, new treeNameNode(element));
     }
     return root;
 }
@@ -164,6 +163,7 @@ treeNameNode* searchNameNode(treeNameNode* root, const string &treeName) {
 }
 
 /* Item Tree Functions */
+
 /* insertItem
  * Description: Inserts each individual Item into their respective location in their Item tree.
  * Parameters:
@@ -226,13 +226,12 @@ void insertToItems(treeNameNode *root, const int numItems) {
 
         treeNameNode* rootOfItem = searchNameNode(root, item_tree); // Node of root of the given Item tree
         if (rootOfItem != nullptr) {
-            itemNode* tempNode = new itemNode (item_name,item_count);
+            auto* tempNode = new itemNode (item_name,item_count);
             rootOfItem->theTree = insertItem(rootOfItem->theTree, tempNode);
         } else {
             cout << "The item: \"" << itemQuery << "\" could not be inserted because the tree:  " <<
                 item_tree << "does not exist." << endl;
         }
-        item_tree = "", item_name = "";
     }
 }
 
@@ -275,6 +274,63 @@ void tint_items(const itemNode* node) {
     tint_items(node->right);
 }
 
+/* Query Functions */
+/*search
+ * Description:
+ * Parameters:
+ * - treeNameNode* root:
+ * - string tree_name:
+ * - string item_name:
+ * Return:
+ */
+string search(treeNameNode* root, const string &tree_name, const string &item_name) {
+    treeNameNode* node = searchNameNode(root, tree_name);
+    if (node != nullptr) {
+        itemNode* item_node = node->theTree;
+        while(item_node) {
+            if(item_node->name == item_name)
+                return to_string(item_node->count) + " " + item_name + " found in " + tree_name;
+            if (item_name < item_node->name)
+                item_node = item_node->left;
+            else if (item_name > item_node->name)
+                item_node = item_node->right;
+        }
+        return item_name + " not found in " + tree_name;
+    }
+    return tree_name + " does not exist";
+}
+
+void item_before() {}
+void height_balance() {}
+void count() {}
+
+/*querySelector
+ * Description:
+ * Parameters:
+ * Return: nothing
+ */
+void querySelector(treeNameNode* root, int numQuery) {
+    // Extracts query term from the next line
+    for (int i = 1; i <= numQuery; i++) {
+        string fullQuery = nextLine();
+        int pos = fullQuery.find(' ');
+        string theQuery = fullQuery.substr(0, pos);
+        fullQuery = fullQuery.substr(pos+1);
+
+        if (theQuery == "search") {
+            pos = fullQuery.find(' ');
+            string tree_name = fullQuery.substr(0,pos);
+            fullQuery = fullQuery.substr(pos+1); //item_name
+            cout << search(root,tree_name,fullQuery);
+            cout << endl;
+
+        } else {
+            cout << "Not implemented yet" << endl;
+        }
+
+    }
+}
+
 
 int main() {
     int numTreeNames = 0, numItems = 0, numQuery = 0;
@@ -293,10 +349,6 @@ int main() {
                 numItems = is_Int;
             else if (numQuery == 0)
                 numQuery = is_Int;
-            else
-                throw ("First line of in.txt is not correctly formatted\n "
-                       "It should be three integers in sequence like \"N I Q\"");
-
         }
     }
 
@@ -304,6 +356,7 @@ int main() {
     name_tree = buildNameTree(numTreeNames);
     insertToItems(name_tree, numItems);
     traverse_in_traverse(name_tree);
+    querySelector(name_tree,numQuery);
 
     delete name_tree;
     return 0;
