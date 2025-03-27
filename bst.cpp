@@ -66,7 +66,7 @@ public:
 };
 
 /* output_and_write
- * Description: Prints output to console and writes to a file "example_out.txt"
+ * Description: Prints output to console and writes to a file "out.txt"
  * Parameter: const string& output: The output
  * Return: nothing
  */
@@ -463,16 +463,16 @@ void querySelector(treeNameNode* root, int numQuery) {
 
 
 int main() {
-    // A small little check for example_out.txt files
-    if(filesystem::exists("example_out.txt")) {
-        cout << "example_out.txt exists, would you like to delete it? (Y/N)" << endl <<
+    // A small little check for out.txt files
+    if(filesystem::exists("out.txt")) {
+        cout << "out.txt exists, would you like to delete it? (Y/N)" << endl <<
             "If not deleting it, then the new output will be written below the "
             "previous outputs." << endl;
         string user_input; cin >> user_input;
         switch (user_input[0]) {
             case 'Y': case 'y':
-                cout << "Deleting example_out.txt..." << endl;
-                remove("example_out.txt");
+                cout << "Deleting out.txt..." << endl;
+                remove("out.txt");
                 this_thread::sleep_for(2s);
                 break;
             default:
