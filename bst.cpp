@@ -236,8 +236,7 @@ void insertToItems(treeNameNode *root, const int numItems) {
 }
 
 
-void tint_names (const treeNameNode* node, bool printItems);
-void tint_items (const itemNode* node);
+
 /* traverse_in_traverse
  * Description: Traverses the main Name tree with inorder traversal, prints each name,
  * then does the same for each name tree (looks at the items)
@@ -247,6 +246,8 @@ void tint_items (const itemNode* node);
  * - tint_items: Traverses Item tree.
  * Return: nothing
  */
+void tint_names (const treeNameNode* node, bool printItems);
+void tint_items (const itemNode* node);
 void traverse_in_traverse (const treeNameNode *root) {
     tint_names(root, false);
     cout << endl;
@@ -279,22 +280,21 @@ void tint_items(const itemNode* node) {
 /* search
  * Description: Searches for an item in a given tree.
  * Parameters:
- *  - itemNode* root: The root of the Item tree which the given item should be in
+ *  - itemNode* node: The root of the Item tree which the item should be in
  * - string tree_name: The tree in which the item should be in
  * - string item_name: The item to find
  * Return: The function can return one of two strings:
  * - Case 1: If the item is found in the tree name, it returns: "(count of item) (name of item) found in (name of tree)"
  * - Case 2: If the tree exists and the item cannot be found, it returns: "(name of item) not found in (name of tree)"
  */
-string search(const itemNode* root, const string &tree_name, const string &item_name) {
-    const itemNode* item_node = root;
-    while(item_node) {
-        if(item_node->name == item_name)
-            return to_string(item_node->count) + " " + item_name + " found in " + tree_name;
-        if (item_name < item_node->name)
-            item_node = item_node->left;
-        else if (item_name > item_node->name)
-            item_node = item_node->right;
+string search(const itemNode* node, const string &tree_name, const string &item_name) {
+    while(node) {
+        if(node->name == item_name)
+            return to_string(node->count) + " " + item_name + " found in " + tree_name;
+        if (item_name < node->name)
+            node = node->left;
+        else if (item_name > node->name)
+            node = node->right;
     }
     return item_name + " not found in " + tree_name;
 }
@@ -302,24 +302,24 @@ string search(const itemNode* root, const string &tree_name, const string &item_
 /* item_before
  * Description: Counts the number of items before a node.
  * Parameters:
- * - itemNode* root: The root of the Item tree which the given item should be in
+ * - itemNode* node: The root of the Item tree which the item should be in
  * - string tree_name: The tree in which the item should be in
  * - string item_name: The item to find
  * Return: The function can return one of two strings:
  * - Case 1: If the item is found in the tree name, it returns: "items before (name of item): (# of items before it)"
  * - Case 2: If the tree exists and the item cannot be found, it returns: "(name of item) not found in (name of tree)"
  */
-string item_before(const itemNode* root, const string &tree_name, const string &item_name) {
-    int count = 1;
-    const itemNode* item_node = root;
-    while(item_node) {
-        count++;
-        if(item_node->name == item_name)
-            return "items before " + item_name + ": " + to_string(count);
-        if (item_name < item_node->name) {
-            item_node = item_node->left;
-        } else if (item_name > item_node->name) {
-            item_node = item_node->right;
+string item_before(const itemNode* node, const string &tree_name, const string &item_name) {
+    int count_before = 1;
+    // Traverses the tree and counts any items that is not the specified item
+    while(node) {
+        count_before++;
+        if(node->name == item_name)
+            return "items before " + item_name + ": " + to_string(count_before);
+        if (item_name < node->name) {
+            node = node->left;
+        } else if (item_name > node->name) {
+            node = node->right;
         }
     }
     return item_name + " not found in " + tree_name;
@@ -328,16 +328,37 @@ string item_before(const itemNode* root, const string &tree_name, const string &
 /* height_balance
  * Description: Finds the height of the left and right subtree and prints them. Also prints if the tree is balanced
  * Parameters:
- *
+ * - itemNode* node: The root of the Item tree to be checked
+ * - string tree_name: The name of said item tree
  * Return:
  */
-void height_balance() {}
+void height_balance(const itemNode* node, const string& tree_name) {
+
+}
+
 /* count
- * Description:
+ * Description: Counts the total number of items in an Item tree. Not each Item node, but the count value that each item
+ * has.
  * Parameters:
- * Return:
+ * - itemNode* node: The root of the Item tree of which its nodes are counted
+ * Sub-function:
+ *  - count_more: Recursively looks through the tree and adds the count of each item to count, which is passed by
+ *  reference into this function.
+ * Return: count (int), which is the total count of every item in the tree
  */
-void count() {}
+void count_more(const itemNode* node, int* count);
+int count(const itemNode* node) {
+    int count = 0;
+    count_more(node, &count);
+    return count;
+}
+void count_more(const itemNode* node, int* count) {
+    if (!node)
+        return;
+    count_more(node->left, count);
+    *count += node->count;
+    count_more(node->right, count);
+}
 
 /* querySelector
  * Description: Extracts queries from the input then either calls the query function or prints that said tree does
@@ -366,7 +387,7 @@ void querySelector(treeNameNode* root, int numQuery) {
             } else if (theQuery == "height_balance") {
                 cout << "Not implemented yet: height_balance"<< endl;
             } else if (theQuery == "count") {
-                cout << "Not implemented yet: count" << endl;
+                cout << tree_name << " count: " << count(node->theTree) << endl;
             } else {
                 cout << "Invalid query" << endl;
             }
