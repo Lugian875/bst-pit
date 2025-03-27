@@ -330,10 +330,55 @@ string item_before(const itemNode* node, const string &tree_name, const string &
  * Parameters:
  * - itemNode* node: The root of the Item tree to be checked
  * - string tree_name: The name of said item tree
- * Return:
+ * Return: nothing
  */
-void height_balance(const itemNode* node, const string& tree_name) {
+void height_balance(itemNode* node, const string& tree_name) {
+    int left_height = 0, right_height = 0;
+    // A separate node is created to store the root of the item tree since it needs to be reset
+    itemNode* item_node = node;
+    // For measuring the height of the left subtree
+    while(item_node) {
+        // Catch for if the left subtree has no nodes
+        if (left_height == 0 && item_node->left == nullptr) {
+            break;
+        }
 
+        if (item_node->left != nullptr)
+            left_height++;
+        else if (item_node->right != nullptr) {
+            item_node = item_node->right;
+            left_height++;
+            continue;
+        }
+        item_node = item_node->left;
+    }
+
+    item_node = node; // Resets item_node to the root of the item tree for a second traversal
+
+    // For measuring the height of the right subtree
+    while(item_node) {
+        // Catch for if the right subtree has no nodes
+        if (right_height == 0 && item_node->right == nullptr) {
+            break;
+        }
+        if (item_node->right != nullptr)
+            right_height++;
+        else if (item_node->left != nullptr) {
+            item_node = item_node->left;
+            right_height++;
+            continue;
+        }
+        item_node = item_node->right;
+    }
+
+    // The final output for a height_balance query
+    cout << tree_name << ": left height " << left_height << ", right height " << right_height <<
+        ", difference " << right_height-left_height;
+    // Checking if the BST is balanced
+    if (abs(right_height - left_height) > 1)
+        cout << ", not balanced" << endl;
+    else
+        cout << ", balanced" << endl;
 }
 
 /* count
@@ -385,7 +430,7 @@ void querySelector(treeNameNode* root, int numQuery) {
                 fullQuery = fullQuery.substr(pos+1); //item_name
                 cout << item_before(node->theTree,tree_name,fullQuery) << endl;
             } else if (theQuery == "height_balance") {
-                cout << "Not implemented yet: height_balance"<< endl;
+                height_balance(node->theTree,tree_name);
             } else if (theQuery == "count") {
                 cout << tree_name << " count: " << count(node->theTree) << endl;
             } else {
