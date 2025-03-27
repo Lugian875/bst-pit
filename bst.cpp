@@ -1,7 +1,7 @@
 /* bst.cpp
  * Maxwell Benefield
  * COP3415
- * Last Modified: March 25, 2025
+ * Last Modified: March 27, 2025
  */
 #include <iostream>
 #include <fstream>
@@ -279,64 +279,56 @@ void tint_items(const itemNode* node) {
 /* search
  * Description: Searches for an item in a given tree.
  * Parameters:
- * - treeNameNode* root: The root of the Name tree
+ *  - itemNode* root: The root of the Item tree which the given item should be in
  * - string tree_name: The tree in which the item should be in
  * - string item_name: The item to find
- * Return: The function can return one of three strings:
+ * Return: The function can return one of two strings:
  * - Case 1: If the item is found in the tree name, it returns: "(count of item) (name of item) found in (name of tree)"
  * - Case 2: If the tree exists and the item cannot be found, it returns: "(name of item) not found in (name of tree)"
- * - Case 3: If the specified tree does not exist, then it returns: "(tree name) does not exist"
  */
-string search(treeNameNode* root, const string &tree_name, const string &item_name) {
-    treeNameNode* node = searchNameNode(root, tree_name);
-    if (node != nullptr) {
-        itemNode* item_node = node->theTree;
-        while(item_node) {
-            if(item_node->name == item_name)
-                return to_string(item_node->count) + " " + item_name + " found in " + tree_name;
-            if (item_name < item_node->name)
-                item_node = item_node->left;
-            else if (item_name > item_node->name)
-                item_node = item_node->right;
-        }
-        return item_name + " not found in " + tree_name;
+string search(const itemNode* root, const string &tree_name, const string &item_name) {
+    const itemNode* item_node = root;
+    while(item_node) {
+        if(item_node->name == item_name)
+            return to_string(item_node->count) + " " + item_name + " found in " + tree_name;
+        if (item_name < item_node->name)
+            item_node = item_node->left;
+        else if (item_name > item_node->name)
+            item_node = item_node->right;
     }
-    return tree_name + " does not exist";
+    return item_name + " not found in " + tree_name;
 }
 
 /* item_before
  * Description: Counts the number of items before a node.
-* treeNameNode* root: The root of the Name tree
+ * Parameters:
+ * - itemNode* root: The root of the Item tree which the given item should be in
  * - string tree_name: The tree in which the item should be in
  * - string item_name: The item to find
- * Return: The function can return one of three strings:
+ * Return: The function can return one of two strings:
  * - Case 1: If the item is found in the tree name, it returns: "items before (name of item): (# of items before it)"
  * - Case 2: If the tree exists and the item cannot be found, it returns: "(name of item) not found in (name of tree)"
- * - Case 3: If the specified tree does not exist, then it returns: "(tree name) does not exist"
  */
-string item_before(treeNameNode* root, const string &tree_name, const string &item_name) {
-    treeNameNode* node = searchNameNode(root, tree_name);
-    if (node != nullptr) {
-        int count = 1;
-        itemNode* item_node = node->theTree;
-        while(item_node) {
-            count++;
-            if(item_node->name == item_name)
-                return "items before " + item_name + ": " + to_string(count);
-            if (item_name < item_node->name) {
-                item_node = item_node->left;
-            } else if (item_name > item_node->name) {
-                item_node = item_node->right;
-            }
+string item_before(const itemNode* root, const string &tree_name, const string &item_name) {
+    int count = 1;
+    const itemNode* item_node = root;
+    while(item_node) {
+        count++;
+        if(item_node->name == item_name)
+            return "items before " + item_name + ": " + to_string(count);
+        if (item_name < item_node->name) {
+            item_node = item_node->left;
+        } else if (item_name > item_node->name) {
+            item_node = item_node->right;
         }
-        return item_name + " not found in " + tree_name;
     }
-    return tree_name + " does not exist";
+    return item_name + " not found in " + tree_name;
 }
 
 /* height_balance
- * Description:
+ * Description: Finds the height of the left and right subtree and prints them. Also prints if the tree is balanced
  * Parameters:
+ *
  * Return:
  */
 void height_balance() {}
@@ -348,37 +340,39 @@ void height_balance() {}
 void count() {}
 
 /* querySelector
- * Description:
+ * Description: Extracts queries from the input then either calls the query function or prints that said tree does
+ * not exist (if needed).
  * Parameters:
+ * - treeNamenode* root: The root of the Name tree
+ * - int numQuery: The number of queries in the input file
  * Return: nothing
  */
 void querySelector(treeNameNode* root, int numQuery) {
-    // Extracts query term from the next line
     for (int i = 1; i <= numQuery; i++) {
-        string fullQuery = nextLine();
-        int pos = fullQuery.find(' ');
-        string theQuery = fullQuery.substr(0, pos);
-        fullQuery = fullQuery.substr(pos+1);
+        // Extracts next line from input for processing
+        string fullQuery = nextLine(); int pos = fullQuery.find(' ');
+        string theQuery = fullQuery.substr(0, pos); // Extracts query term
+        fullQuery = fullQuery.substr(pos+1); pos = fullQuery.find(' ');
+        string tree_name = fullQuery.substr(0,pos); // Extracts tree name for where the query will execute on
+        treeNameNode* node = searchNameNode(root, tree_name); // Attempts to find the node in the Name tree
 
-        if (theQuery == "search") {
-            pos = fullQuery.find(' ');
-            string tree_name = fullQuery.substr(0,pos);
-            fullQuery = fullQuery.substr(pos+1); //item_name
-            cout << search(root,tree_name,fullQuery) << endl;
-        }
-        else if (theQuery == "item_before") {
-            pos = fullQuery.find(' ');
-            string tree_name = fullQuery.substr(0,pos);
-            fullQuery = fullQuery.substr(pos+1); //item_name
-            cout << item_before(root,tree_name,fullQuery) << endl;
-        }
-        else if (theQuery == "height_balance") {
-            cout << "Not implemented yet: height_balance"<< endl;
-        }
-        else if (theQuery == "count") {
-            cout << "Not implemented yet: count" << endl;
+        if (node!= nullptr) {
+            if (theQuery == "search") {
+                fullQuery = fullQuery.substr(pos+1); //item_name
+                cout << search(node->theTree,tree_name,fullQuery) << endl;
+            } else if (theQuery == "item_before") {
+                fullQuery = fullQuery.substr(pos+1); //item_name
+                cout << item_before(node->theTree,tree_name,fullQuery) << endl;
+            } else if (theQuery == "height_balance") {
+                cout << "Not implemented yet: height_balance"<< endl;
+            } else if (theQuery == "count") {
+                cout << "Not implemented yet: count" << endl;
+            } else {
+                cout << "Invalid query" << endl;
+            }
         } else {
-            cout << "Invalid query" << endl;
+            // If it can find the node in the Name tree
+            cout << tree_name << " does not exist" << endl;
         }
     }
 }
