@@ -7,6 +7,8 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <filesystem>
+#include <thread>
 
 using namespace std;
 
@@ -63,12 +65,28 @@ public:
     }
 };
 
+/* output_and_write
+ * Description: Prints output to console and writes to a file "example_out.txt"
+ * Parameter: const string& output: The output
+ * Return: nothing
+ */
+inline void output_and_write(const string& output, bool endLine) {
+    ofstream file("out.txt", ios_base::app);
+    if (!output.empty()) {
+        cout << output; file << output;
+    }
+    if (endLine == true) {
+        cout << endl; file<<endl;
+    }
+}
+
+
 /* nextLine
  * Description: Each time the function is called, the next line of "in.txt" is read.
  * Parameters: none
  * Return: The string from the given line in the .txt file.
  */
-string nextLine() {
+inline string nextLine() {
     static ifstream file;
     static bool fileOpened = false;
 
@@ -82,13 +100,11 @@ string nextLine() {
     }
 
     string line;
-    if (getline(file, line)) {
+    if (getline(file, line))
         return line;
-    } else {
-        file.close();
-        fileOpened = false;
-        return "EOF"; // end of file
-    }
+    file.close();
+    fileOpened = false;
+    return "EOF"; // end of file
 }
 
 /* Name Tree Functions */
@@ -165,7 +181,7 @@ treeNameNode* searchNameNode(treeNameNode* root, const string &treeName) {
 /* Item Tree Functions */
 
 /* insertItem
- * Description: Inserts each individual Item into their respective location in their Item tree.
+ * Description: Inserts an item into the respective location in the item tree
  * Parameters:
  * - itemNode* root: The root of the item tree
  * - itemNode* element: The element to be added, containing the name and count of Item
@@ -197,14 +213,14 @@ itemNode *insertItem(itemNode* root, itemNode* element) {
     }
 }
 
-/* insertToItems
+/* insertToItem
  * Description: Inserts nodes into Item trees found in the Name tree
  * Parameters:
  * - treeNameNode* root: The root of the Name tree where the Item trees within will get items added to it
  * - const int numItems: The number of lines from the input that have queries for inserting Item nodes
  * Return: nothing
  */
-void insertToItems(treeNameNode *root, const int numItems) {
+void insertToItem(treeNameNode *root, const int numItems) {
     int item_count = 0; // Stores "count" of item specified in each line
 
     for (int i = 1; i <= numItems; i++) {
@@ -250,7 +266,7 @@ void tint_names (const treeNameNode* node, bool printItems);
 void tint_items (const itemNode* node);
 void traverse_in_traverse (const treeNameNode *root) {
     tint_names(root, false);
-    cout << endl;
+    output_and_write("",true);
     tint_names(root, true);
     cout << endl;
 }
@@ -259,11 +275,11 @@ void tint_names (const treeNameNode* node, bool printItems) {
         return;
     tint_names(node->left, printItems);
     if (printItems == false)
-        cout << node->treeName << " ";
+        output_and_write(node->treeName + " ", false);
     else {
-        cout << "***" << node->treeName << "***" << endl;
+        output_and_write("***" + node->treeName + "***", true);
         tint_items(node->theTree);
-        cout << endl;
+        output_and_write("",true);
     }
     tint_names(node->right, printItems);
 }
@@ -271,7 +287,7 @@ void tint_items(const itemNode* node) {
     if (!node)
         return;
     tint_items(node->left);
-    cout << node->name << " ";
+    output_and_write(node->name + " ",false);
     tint_items(node->right);
 }
 
@@ -372,13 +388,15 @@ void height_balance(itemNode* node, const string& tree_name) {
     }
 
     // The final output for a height_balance query
-    cout << tree_name << ": left height " << left_height << ", right height " << right_height <<
-        ", difference " << right_height-left_height;
+    string output_hb;
+    output_hb.append(tree_name + ": left height " + to_string(left_height) + ", right height " +
+        to_string(right_height) + ", difference " + to_string(right_height-left_height));
     // Checking if the BST is balanced
     if (abs(right_height - left_height) > 1)
-        cout << ", not balanced" << endl;
+        output_hb.append(", not balanced");
     else
-        cout << ", balanced" << endl;
+        output_hb.append(", balanced");
+    output_and_write(output_hb, true);
 }
 
 /* count
@@ -425,26 +443,44 @@ void querySelector(treeNameNode* root, int numQuery) {
         if (node!= nullptr) {
             if (theQuery == "search") {
                 fullQuery = fullQuery.substr(pos+1); //item_name
-                cout << search(node->theTree,tree_name,fullQuery) << endl;
+                output_and_write(search(node->theTree,tree_name,fullQuery),true);
             } else if (theQuery == "item_before") {
                 fullQuery = fullQuery.substr(pos+1); //item_name
-                cout << item_before(node->theTree,tree_name,fullQuery) << endl;
+                output_and_write(item_before(node->theTree,tree_name,fullQuery),true);
             } else if (theQuery == "height_balance") {
                 height_balance(node->theTree,tree_name);
             } else if (theQuery == "count") {
-                cout << tree_name << " count: " << count(node->theTree) << endl;
+                output_and_write(tree_name + " count: " + to_string(count(node->theTree)),true);
             } else {
                 cout << "Invalid query" << endl;
             }
         } else {
             // If it can find the node in the Name tree
-            cout << tree_name << " does not exist" << endl;
+            output_and_write(tree_name + " does not exist", true);
         }
     }
 }
 
 
 int main() {
+    // A small little check for example_out.txt files
+    if(filesystem::exists("example_out.txt")) {
+        cout << "example_out.txt exists, would you like to delete it? (Y/N)" << endl <<
+            "If not deleting it, then the new output will be written below the "
+            "previous outputs." << endl;
+        string user_input; cin >> user_input;
+        switch (user_input[0]) {
+            case 'Y': case 'y':
+                cout << "Deleting example_out.txt..." << endl;
+                remove("example_out.txt");
+                this_thread::sleep_for(2s);
+                break;
+            default:
+                cout << "Ok then" << endl;
+                break;
+        }
+    }
+
     int numTreeNames = 0, numItems = 0, numQuery = 0;
     treeNameNode* name_tree= nullptr;
 
@@ -464,9 +500,8 @@ int main() {
         }
     }
 
-    cout << numQuery << endl;
     name_tree = buildNameTree(numTreeNames);
-    insertToItems(name_tree, numItems);
+    insertToItem(name_tree, numItems);
     traverse_in_traverse(name_tree);
     querySelector(name_tree,numQuery);
 
